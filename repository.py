@@ -49,7 +49,17 @@ def create_class(
                 (name, trainer_id, day_of_week, start_time, end_time, capacity),
             )
             row = cur.fetchone()
-    return GymClass(**row)
+            if not row:
+                raise RuntimeError("INSERT INTO classes no devolvió fila")
+    return GymClass(
+        id=row["id"],
+        name=row["name"],
+        trainer_id=row["trainer_id"],
+        day_of_week=row["day_of_week"],
+        start_time=row["start_time"],
+        end_time=row["end_time"],
+        capacity=row["capacity"],
+    )
 
 
 def get_trainer(trainer_id: int) -> Optional[Trainer]:

@@ -1,5 +1,8 @@
 from datetime import datetime
 
+import psycopg2
+
+from colors import c, BOLD, CYAN, GREEN, RED, YELLOW
 from db import init_schema
 import service
 
@@ -12,27 +15,28 @@ def main():
     init_schema()
 
     while True:
-        print("\n=== Gestión de Gimnasio ===")
-        print("1. Alta entrenador")
-        print("2. Alta miembro")
-        print("3. Alta clase")
-        print("4. Inscribir miembro en clase")
-        print("5. Registrar asistencia")
-        print("6. Listar clases")
-        print("0. Salir")
+        print()
+        print(c("=== Gestión de Gimnasio ===", BOLD + CYAN))
+        print(c("1.", YELLOW), "Alta entrenador")
+        print(c("2.", YELLOW), "Alta miembro")
+        print(c("3.", YELLOW), "Alta clase")
+        print(c("4.", YELLOW), "Inscribir miembro en clase")
+        print(c("5.", YELLOW), "Registrar asistencia")
+        print(c("6.", YELLOW), "Listar clases")
+        print(c("0.", YELLOW), "Salir")
 
-        option = input("Opción: ").strip()
+        option = input(c("Opción: ", CYAN)).strip()
 
         try:
             if option == "1":
                 name = input("Nombre del entrenador: ")
                 t = service.create_trainer(name)
-                print(f"Entrenador creado con id {t.id}")
+                print(c(f"Entrenador creado con id {t.id}", GREEN))
 
             elif option == "2":
                 name = input("Nombre del miembro: ")
                 m = service.create_member(name)
-                print(f"Miembro creado con id {m.id}")
+                print(c(f"Miembro creado con id {m.id}", GREEN))
 
             elif option == "3":
                 name = input("Nombre de la clase: ")
@@ -42,41 +46,44 @@ def main():
                 end = parse_time(input("Hora fin (HH:MM): "))
                 capacity = int(input("Cupo máximo: "))
 
-                c = service.create_class(name, trainer_id, day, start, end, capacity)
-                print(f"Clase creada con id {c.id}")
+                c_obj = service.create_class(name, trainer_id, day, start, end, capacity)
+                print(c(f"Clase creada con id {c_obj.id}", GREEN))
 
             elif option == "4":
                 class_id = int(input("Id de la clase: "))
                 member_id = int(input("Id del miembro: "))
                 service.enroll_member(class_id, member_id)
-                print("Miembro inscrito correctamente")
+                print(c("Miembro inscrito correctamente", GREEN))
 
             elif option == "5":
                 class_id = int(input("Id de la clase: "))
                 member_id = int(input("Id del miembro: "))
                 service.mark_attendance(class_id, member_id)
-                print("Asistencia registrada")
+                print(c("Asistencia registrada", GREEN))
 
             elif option == "6":
-                print("\nClases:")
-                for c in service.list_classes():
+                print()
+                print(c("Clases:", YELLOW))
+                for c_obj in service.list_classes():
                     print(
-                        f"[{c.id}] {c.name} - Entrenador {c.trainer_id} - "
-                        f"Día: {c.day_of_week} {c.start_time}-{c.end_time} "
-                        f"Cupo: {c.capacity}"
+                        f"  [{c_obj.id}] {c_obj.name} - Entrenador {c_obj.trainer_id} - "
+                        f"Día: {c_obj.day_of_week} {c_obj.start_time}-{c_obj.end_time} "
+                        f"Cupo: {c_obj.capacity}"
                     )
 
             elif option == "0":
-                print("Hasta luego.")
+                print(c("Hasta luego.", GREEN))
                 break
 
             else:
-                print("Opción no válida.")
+                print(c("Opción no válida.", RED))
 
         except service.BusinessError as e:
-            print(f"Error de negocio: {e}")
+            print(c(f"Error de negocio: {e}", RED))
         except ValueError as e:
-            print(f"Error de entrada: {e}")
+            print(c(f"Error de entrada: {e}", RED))
+        except psycopg2.Error as e:
+            print(c(f"Error de base de datos: {e}", RED))
 
 
 if __name__ == "__main__":

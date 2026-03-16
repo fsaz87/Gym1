@@ -24,6 +24,8 @@ def create_class(
     end_time: time,
     capacity: int,
 ) -> GymClass:
+    if repo.get_trainer(trainer_id) is None:
+        raise BusinessError("El entrenador no existe. Cree primero un entrenador (opción 1).")
     if end_time <= start_time:
         raise BusinessError("La hora de fin debe ser posterior a la de inicio")
     return repo.create_class(
